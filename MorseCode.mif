@@ -1,0 +1,136 @@
+WIDTH=16;
+DEPTH=2048;
+
+ADDRESS_RADIX=HEX;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+0000: 9000; -- 	IN Switches
+0001: 4003; --     JZERO SwUp
+0002: 2800; --     JUMP Start
+0003: 086E; --     LOAD TMin
+0004: 506D; --     OR  SIGN
+0005: 9850; --     OUT Sound
+0006: 086F; --     LOAD VMin
+0007: 9850; --     OUT Sound
+0008: B800; -- 	LOADI 0
+0009: 107D; -- 	STORE SignalCount
+000A: 1074; -- 	STORE StateMem
+000B: 107E; -- 	STORE tFilter
+000C: 1070; -- 	STORE Tme
+000D: 9000; -- 	IN Switches
+000E: 3810; --     JPOS PulledUp
+000F: 2803; --     JUMP SwUp
+0010: B800; --     LOADI 0
+0011: 9850; --     OUT Sound
+0012: 9050; -- 	IN     Sound
+0013: 3016; -- 	JNEG Tstart
+0014: 107E; -- 	STORE 	tFilter	; store the time until the next snap found
+0015: 2818; -- 	Jump 	Continue ; no sound detected, continue on the loop
+0016: 087E; -- 	LOAD tFilter		; load the latest positive number
+0017: 8027; -- 	CALL Define
+0018: 8020; --     CALL   Abs
+0019: 9801; --     OUT    LEDs
+001A: B801; --     LOADI 1
+001B: 8066; --     CALL Wait
+001C: 9000; --     IN Switches
+001D: 3812; --     JPOS Loop
+001E: 4000; --     JZERO Start
+001F: 281F; -- 	JUMP AEnd	; infinity loop of the whole program
+0020: 3022; -- 	JNEG   Negate
+0021: 8800; --     RETURN ; positive or zero; just return
+0022: 1026; -- 	STORE  NegTemp
+0023: 2026; --     SUB    NegTemp
+0024: 2026; --     SUB    NegTemp
+0025: 8800; -- 	RETURN
+0026: 0000; -- NegTemp: DW 0
+0027: 1070; --     STORE   Tme         
+0028: 2072; --     SUB     TEnd        ; Detect if it is end of letter or not (5s).
+0029: 385F; --     JPOS    End      ; If end of string, Loop back to this whole subroutines to get new input from Alan.
+002A: 087D; --     LOAD	SignalCount	; check if all four signals detected
+002B: 6FFC; -- 	ADDI	-4
+002C: 385F; -- 	JPOS	End
+002D: 0870; -- 	LOAD    Tme         ; Detect dash or dot.
+002E: 2073; --     SUB     Tdash
+002F: 3835; --     JPOS    DetectDsh
+0030: 0874; --     LOAD    StateMem 
+0031: 1876; --     ADD     Adot
+0032: 6001; -- 	SHIFT	1
+0033: 1074; --     STORE   StateMem    ; store the StateMem, it should be shift left once and then add 1 or 0 by now
+0034: 2839; --     JUMP    SeeA
+0035: 0874; --     LOAD    StateMem 
+0036: 1875; --     ADD     ADash
+0037: 6001; -- 	SHIFT	1
+0038: 1074; --     STORE   StateMem    ; store the StateMem, it should be shift left once and then add 1 or 0 by now
+0039: 0874; --     LOAD StateMem
+003A: 2077; --     SUB CheckA
+003B: 404D; --     JZERO A
+003C: 0874; --     LOAD StateMem
+003D: 2078; --     SUB CheckB
+003E: 404F; --     JZERO B
+003F: 0874; --     LOAD StateMem
+0040: 2079; --     SUB CheckC
+0041: 4051; --     JZERO C
+0042: 0874; --     LOAD StateMem
+0043: 207A; --     SUB CheckD
+0044: 4053; --     JZERO D
+0045: 0874; --     LOAD StateMem
+0046: 207B; --     SUB CheckE
+0047: 4055; --     JZERO E
+0048: 0874; --     LOAD StateMem
+0049: 207C; --     SUB CheckF
+004A: 4057; --     JZERO F
+004B: BFFF; --     LOADI	-1
+004C: 2859; --     JUMP Play       ; Just show the time. Change the out put as you wish
+004D: B80A; -- 	LOADI 10
+004E: 2859; -- 	JUMP Play
+004F: B80B; -- 	LOADI 11
+0050: 2859; -- 	JUMP Play
+0051: B80C; -- 	LOADI 12
+0052: 2859; -- 	JUMP Play
+0053: B80D; -- 	LOADI 13
+0054: 2859; -- 	JUMP Play
+0055: B80E; -- 	LOADI 14
+0056: 2859; -- 	JUMP Play
+0057: B80F; -- 	LOADI 15
+0058: 2859; -- 	JUMP Play
+0059: 1071; --     STORE TempOut
+005A: 087D; -- 	LOAD SignalCount	; one signal found, add one and store it 
+005B: 6801; -- 	ADDI 1
+005C: 107D; -- 	STORE SignalCount
+005D: 0870; --     LOAD Tme
+005E: 8800; --     RETURN
+005F: 0871; -- 	LOAD   TempOut     ; Load the temperate outputs
+0060: 9804; --     OUT    Hex0        ; This should be the only output statement to display letter on Hex. 
+0061: B800; --     LOADI 0            
+0062: 1074; --     STORE   StateMem    ; initialize the StateMem to 1
+0063: 107D; -- 	storE SignalCount	; reset signal count
+0064: 0870; -- 	LOAD Tme
+0065: 8800; --     RETURN
+0066: 106C; --     STORE WaitInterval
+0067: 9802; -- 	OUT    Timer
+0068: 9002; -- 	IN     Timer
+0069: 206C; -- 	SUB WaitInterval
+006A: 3068; -- 	JNEG   WaitingLoop
+006B: 8800; -- 	RETURN
+006C: 0000; -- WaitInterval: DW &H000
+006D: 8000; -- SIGN: DW &H8000
+006E: 0003; -- TMin: DW &H0003
+006F: 0200; -- VMin: DW &H0200
+0070: 0014; -- Tme:        DW 20        ; Temp storage for sound.
+0071: FFFF; -- TempOut:    DW -1   ; Initial out to 0
+0072: 001E; -- TEnd:       DW 30   ; Make this equal to 5 seconds for end of string. Or whatever second we want to determine end of string.em
+0073: 000F; -- Tdash:      DW 15   ; Make this equal to whatever time you want the dash to be detected.
+0074: 0000; -- StateMem:   DW 0   ; Reserve Memory for state machine mimic Memory.
+0075: 0005; -- ADash:      DW 5   ; Everytime a dash found, increase StateMem by 100
+0076: 0003; -- Adot:       DW 3   ; Everytime a dot found, increase StateMem by 1
+0077: 0016; -- CheckA:     DW 22   ; Set the Output A Check
+0078: 007A; -- CheckB:     DW 122   ; Set the Output B Check
+0079: 0086; -- CheckC:     DW 134   ; Set the Output C Check
+007A: 003A; -- CheckD:     DW 58  ; Set the Output D Check
+007B: 0006; -- CheckE:     DW 6  ; Set the Output E Check
+007C: 005A; -- CheckF:     DW 90   ; Set the Output F Check
+007D: 0000; -- SignalCount:	DW 0	; Set the signal counter to 0
+007E: 0000; -- tFilter: DW 0
+[007F..07FF] : 0000; -- [empty memory]
+END;
